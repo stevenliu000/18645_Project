@@ -22,6 +22,9 @@ int timer_helper_subpixel = 10;
 uint64_t cycles_subpixel = 0;
 int timer_helper_harris = 10;
 uint64_t cycles_harris = 0;
+long long Extrema_Localization_count = 0;
+long long Adjusting_keypoint_locations_count = 0;
+long long Eliminating_Edge_Responses_count = 0;
 
 
 namespace cv
@@ -417,6 +420,7 @@ namespace cv
             
             for( ; i < SIFT_MAX_INTERP_STEPS; i++ )
             {
+                Adjusting_keypoint_locations_count ++;
                 start = rdtsc();
                 int idx = octv*(nOctaveLayers+2) + layer;
                 const Mat& img = dog_pyr[idx];
@@ -426,6 +430,7 @@ namespace cv
                 Vec3f dD((img.at<sift_wt>(r, c+1) - img.at<sift_wt>(r, c-1))*deriv_scale,
                          (img.at<sift_wt>(r+1, c) - img.at<sift_wt>(r-1, c))*deriv_scale,
                          (next.at<sift_wt>(r, c) - prev.at<sift_wt>(r, c))*deriv_scale);
+                // first order derivative
                 
                 float v2 = (float)img.at<sift_wt>(r, c)*2;
                 float dxx = (img.at<sift_wt>(r, c+1) + img.at<sift_wt>(r, c-1) - v2)*second_deriv_scale;
@@ -441,7 +446,7 @@ namespace cv
                 Matx33f H(dxx, dxy, dxs,
                           dxy, dyy, dys,
                           dxs, dys, dss);
-                
+            
                 Vec3f X = H.solve(dD, DECOMP_LU);
                 
                 xi = -X[2];
@@ -479,6 +484,7 @@ namespace cv
                 return false;
             
             {
+                Eliminating_Edge_Responses_count ++;
                 start = rdtsc();
                 int idx = octv*(nOctaveLayers+2) + layer; //2 add 1mul
                 const Mat& img = dog_pyr[idx];
@@ -577,7 +583,7 @@ namespace cv
                     for( int c = SIFT_IMG_BORDER; c < cols-SIFT_IMG_BORDER; c++)
                     {
                         sift_wt val = currptr[c];
-                        
+                        Extrema_Localization_count ++;
                         // find local extrema with pixel accuracy
                         if( std::abs(val) > threshold &&
                            ((val > 0 && val >= currptr[c-1] && val >= currptr[c+1] &&
@@ -1132,6 +1138,10 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
                 tt = end - start;
                 printf("removeDuplicatedSorted cycles: %lld\n", tt);
                 
+                printf("Extrema_Localization_count: %lld\n", Extrema_Localization_count);
+                printf("Adjusting_keypoint_locations_count: %lld\n", Adjusting_keypoint_locations_count);
+                printf("Eliminating_Edge_Responses_count: %lld\n", Eliminating_Edge_Responses_count);
+
                 if( nfeatures > 0 )
                     KeyPointsFilter::retainBest(keypoints, nfeatures);
                 //                t = (double)getTickCount() - t;
