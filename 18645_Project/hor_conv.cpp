@@ -34,21 +34,21 @@ s5 = _mm256_mul_ps(s5, k); \
 s6 = _mm256_mul_ps(s6, k); \
 s7 = _mm256_mul_ps(s7, k); \
 
-#define reduce_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, dst) \
+#define reduce_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, d0) \
 h1 = _mm256_hadd_ps(s0, s1); \
 h4 = _mm256_hadd_ps(s4, s5); \
 h2 = _mm256_hadd_ps(s2, s3); \
 h5 = _mm256_hadd_ps(s6, s7); \
 h3 = _mm256_hadd_ps(h1, h2); \
 h6 = _mm256_hadd_ps(h4, h5); \
-dst[0] += h3[0] + h3[4]; \
-dst[1] += h3[1] + h3[5]; \
-dst[2] += h3[2] + h3[6]; \
-dst[3] += h3[3] + h3[7]; \
-dst[4] += h6[0] + h6[4]; \
-dst[5] += h6[1] + h6[5]; \
-dst[6] += h6[2] + h6[6]; \
-dst[7] += h6[3] + h6[7]; \
+d0[0] += h3[0] + h3[4]; \
+d0[1] += h3[1] + h3[5]; \
+d0[2] += h3[2] + h3[6]; \
+d0[3] += h3[3] + h3[7]; \
+d0[4] += h6[0] + h6[4]; \
+d0[5] += h6[1] + h6[5]; \
+d0[6] += h6[2] + h6[6]; \
+d0[7] += h6[3] + h6[7]; \
 
 #define store_d_horizantal(d0, dst_prt_tmp, n_col) \
 *(dst_prt_tmp + 0 * n_col) = d0[0]; \
@@ -67,7 +67,7 @@ load_kernel_horizontal(l_ptr, k) \
 mul_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, k) \
 reduce_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, dst) \
 
-void horizontal_kernel_conv(int src_row, int src_col, float* src_ptr, int dst_row, int dst_col, float* dst_ptr, int ksize, const float* k_ptr) {
+void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr, int dst_row, int dst_col, float* dst_ptr, int ksize, const float* k_ptr) {
     int i, j, k;
     const int num_of_simd_for_one_kernel = (int)ceil(((double)ksize)/8.0);
 //    printf("num_of_simd_for_one_kernel = %i\n", num_of_simd_for_one_kernel);
@@ -102,7 +102,7 @@ void horizontal_kernel_conv(int src_row, int src_col, float* src_ptr, int dst_ro
             d0 = _mm256_setzero_ps();
             // full SIMDs
             for (k = 0; k < num_of_simd_for_one_kernel; k++) {
-                horizontal_kernel(src_ptr+i*src_col+j+k*8, src_col, (&padded_kernel)+k*8, kernel_SIMD, s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, d0);
+                horizontal_kernel(src_ptr+i*src_col+j+k*8, src_col, (const float*)((&padded_kernel)+k*8), kernel_SIMD, s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, d0);
             }
 //            for (int cc = 0; cc<8; cc++) {
 //                printf("%f ",d0[cc]);

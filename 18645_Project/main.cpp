@@ -1206,8 +1206,8 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
 
 int main( int argc, char** argv )
 {
-    cv::Mat input = cv::imread("/Users/stevenliu/Downloads/IMG_2845.JPG", 0); //Load as grayscale
-    resize(input, input, Size(256, 256));
+    cv::Mat input = cv::imread("/Users/stevenliu/Downloads/demo1024.JPG", 0); //Load as grayscale
+    resize(input, input, Size(1024, 1024));
 
 
     printf("Arguments: \n");

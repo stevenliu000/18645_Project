@@ -290,7 +290,7 @@ void vertical_kernel_conv(int src_row, int src_col, float* src_ptr, int dst_row,
                     load_kernel_vertical_5(k_ptr + 8 * k, k0, k1, k2, k3, k4, k5, k6, k7);
                     kernel_veritcal_5(src_ptr+(i+k*8)*dst_col+j, src_col, k_ptr, s0, s1, s2, s3, s4, s5, s6, s7, k0, k1, k2, k3, k4, k5, k6, k7);
                     sum_to_d(d0, s0);
-                    kernel_veritcal_5(src_ptr+(i+k*8)*dst_col+j*dst_col+8, src_col, k_ptr, s0, s1, s2, s3, s4, s5, s6, s7, k0, k1, k2, k3, k4, k5, k6, k7);
+                    kernel_veritcal_5(src_ptr+(i+k*8)*dst_col+j+8, src_col, k_ptr, s0, s1, s2, s3, s4, s5, s6, s7, k0, k1, k2, k3, k4, k5, k6, k7);
                     sum_to_d(d1, s0);
                     break;
                     

@@ -20,14 +20,20 @@ using namespace std;
 #include "vert_conv.cpp"
 #include "hor_conv.cpp"
 
+/*
+ * add_row_padding
+ * 
+ * input: src - pointer to src
+ * 
+ * output: pointer to new src with padding (using malloc in function)
+ */
 float* add_row_padding(float* src, int width, int ksize) {
-    
     int pad, p_width;
     pad = (ksize - 1)/2;
     p_width = width + 2 * pad;
     
     float* row;
-    row =  new float(width * p_width);
+    row =  new float[width * p_width + 8];
     
     for (int i = 0; i != width; ++i){
         for (int j = 0; j != p_width; ++j){
@@ -43,13 +49,20 @@ float* add_row_padding(float* src, int width, int ksize) {
     return row;
 }
 
+/*
+ * add_col_padding
+ * 
+ * input: src - pointer to src
+ * 
+ * output: pointer to new src with padding (using malloc in function)
+ */
 float* add_col_padding(float* src, int length,int ksize) {
     int pad, p_length;
     pad = (ksize - 1)/2;
     p_length = length + 2 * pad;
     
     float* col;
-    col =  new float(length * p_length);
+    col =  new float[length * p_length];
     
     for (int i = 0; i != p_length; ++i) {
         if (i < pad) {
@@ -217,8 +230,8 @@ void createGaussianKernels( T & kx, T & ky, int type, Size &ksize,
 //                                               _srcType, _dstType, _bufType, _rowBorderType, _columnBorderType, _borderValue ));
 //}
 
-void conv2d_modified(Mat _src, Mat _dst,
-                     Mat kx, Mat ky,
+void conv2d_modified(Mat& _src, Mat& _dst,
+                     Mat& kx, Mat& ky,
                      int borderType = BORDER_DEFAULT) {
     float *kx_ptr = kx.ptr<float>();
     float *ky_ptr = ky.ptr<float>();
@@ -230,21 +243,25 @@ void conv2d_modified(Mat _src, Mat _dst,
     /*  /----/
      *  /----/
      */
-    float *src_row_padding = add_row_padding(src, static_cast<int>(_src.rows), k_len);
-    horizontal_kernel_conv(_src.rows+k_len-1, _src.cols, src, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
+    float *src_row_padding = add_row_padding(src, static_cast<int>(_src.cols), k_len);
+    horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
     
     /*  |-|
      *  | |
      *  |-|
      */
     
-    float *src_col_padding = add_col_padding(src, static_cast<int>(_src.cols), k_len);
-    vertical_kernel_conv(_src.rows, _src.cols+k_len-1, src, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
+    float *src_col_padding = add_col_padding(dst, static_cast<int>(_src.rows), k_len);
+    vertical_kernel_conv(_src.rows+k_len-1, _src.cols, src_col_padding, _dst.rows, _dst.cols, dst, k_len, ky_ptr);
     
-
+//    delete src_row_padding;
+//    delete src_col_padding;
 }
 
-void sepFilter2D_modified(Mat src, Mat dst, Mat kx, Mat ky, 
+/*
+ * sepFilter2D_modified: call conv2d_modified
+ */
+void sepFilter2D_modified(Mat& src, Mat& dst, Mat& kx, Mat& ky, 
                           int borderType) {
                           
                           
