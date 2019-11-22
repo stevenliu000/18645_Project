@@ -3,6 +3,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
+#include "1a.cpp"
 using namespace cv;
 using namespace std;
 
@@ -186,14 +187,16 @@ namespace cv
                 double sig_total = sig_prev*k;
                 sig[i] = std::sqrt(sig_total*sig_total - sig_prev*sig_prev);
                 
-                const Mat& src = pyr[0];
-                int type = src.type();
-                int depth = CV_MAT_DEPTH(type);
-                int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-                int height = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-                printf("sigma[%i] = %f, width: %i, height: %i \n", i, sig[i], width, height);
+//                const Mat& src = pyr[1];
+//                int type = src.type();
+//                int depth = CV_MAT_DEPTH(type);
+//                int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
+//                int height = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
+//                printf("sigma[%i] = %f, width: %i, height: %i \n", i, sig[i], width, height);
             }
             
+            printf("o in nOctaves %i \n", nOctaves);
+            printf("i in nOctaveLayers + 3 %i \n", nOctaveLayers+3);
             for( int o = 0; o < nOctaves; o++ )
             {
                 for( int i = 0; i < nOctaveLayers + 3; i++ )
@@ -214,7 +217,17 @@ namespace cv
                     else
                     {
                         const Mat& src = pyr[o*(nOctaveLayers + 3) + i-1];
-                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
+//                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
+                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i]);
+
+                        int type = src.type();
+                        int depth = CV_MAT_DEPTH(type);
+                        int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
+                        int height = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
+                        printf("o = %i, sigma[%i] = %f, k_width: %i, k_height: %i, src_width: %i, src_height: %i\n", o, i, sig[i], width, height, src.size().width, src.size().height);
+                        
+//                        printf("Size:::: %i, %i",Size().height, Size().width);
+//                        printf("size type: %i", src.type());
                         // TODO: why src and dst are adjacent?
                     }
                 }
@@ -1103,7 +1116,7 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
             Mat base = createInitialImage(image, firstOctave < 0, (float)sigma); //will double
             printf("base size: %i, %i \n", base.rows, base.cols);
             std::vector<Mat> gpyr, dogpyr;
-            int nOctaves = actualNOctaves > 0 ? actualNOctaves : cvRound(std::log( (double)std::min( base.cols, base.rows ) ) / std::log(2.) - 2) - firstOctave; //nOctaves
+            int nOctaves = actualNOctaves > 0 ? actualNOctaves : cvRound(std::log( (double)std::min( base.cols, base.rows ) ) / std::log(2.) - 2) - firstOctave -2; //nOctaves
             printf("nOctaves: %i \n", nOctaves);
             
             double t, tf = getTickFrequency();
@@ -1187,14 +1200,16 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
 
 
 
-
+#define is_aligned(POINTER, BYTE_COUNT) \
+(((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
 
 int main( int argc, char** argv )
 {
-    cv::Mat input = cv::imread("/Users/stevenliu/Downloads/IMG_9874.jpg", 0); //Load as grayscale
+    cv::Mat input = cv::imread("/Users/stevenliu/Downloads/IMG_2845.JPG", 0); //Load as grayscale
     resize(input, input, Size(256, 256));
-    
+
+
     printf("Arguments: \n");
     printf("nfeatures: %i \n", 0);
     printf("nOctaveLayers: %i \n", 3);
@@ -1202,24 +1217,26 @@ int main( int argc, char** argv )
     printf("edgeThreshold: %i \n", 10);
     printf("sigma: %f \n", 1.6);
     printf("\n");
-    
+
     Mat output;
     Mat mask = Mat();
-    
+
     cv::Ptr<Feature2D> f2d = xfeatures2d::SIFT::create();
-    
+
     cv::xfeatures2d::SIFT_Impl sift_instance = cv::xfeatures2d::SIFT_Impl();
-    
+
     std::vector<KeyPoint> keypoints_1;
     std::vector<KeyPoint> keypoints_2;
-    
+
     printf("Input Size is %i, %i \n",input.rows,input.cols);
     sift_instance.detectAndCompute(input, mask, keypoints_2, output);
     //    f2d->detect( input, keypoints_1 );
-    
+
     cv::drawKeypoints(input, keypoints_2, input);
     namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
     imshow( "Display window", input );                // Show our image inside it.
+
+//    delete(your_matrix);
     waitKey(0);
     
     return 0;

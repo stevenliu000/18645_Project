@@ -70,6 +70,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		268606702377913E00E6FFBE /* 1a.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 1a.cpp; sourceTree = "<group>"; };
+		268606712377913E00E6FFBE /* 1a.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = 1a.hpp; sourceTree = "<group>"; };
+		2698E175237F235800EB73F8 /* hor_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hor_conv.cpp; sourceTree = "<group>"; };
+		2698E176237F235800EB73F8 /* hor_conv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = hor_conv.hpp; sourceTree = "<group>"; };
+		2698E178237F237800EB73F8 /* vert_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vert_conv.cpp; sourceTree = "<group>"; };
+		2698E179237F237800EB73F8 /* vert_conv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vert_conv.hpp; sourceTree = "<group>"; };
 		26ACD91123563C330093EFB2 /* 18645_Project */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 18645_Project; sourceTree = BUILT_PRODUCTS_DIR; };
 		26ACD91423563C330093EFB2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		26ACD91B23563FA10093EFB2 /* precomp.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = precomp.hpp; sourceTree = "<group>"; };
@@ -202,6 +208,12 @@
 			children = (
 				26ACD91B23563FA10093EFB2 /* precomp.hpp */,
 				26ACD91423563C330093EFB2 /* main.cpp */,
+				268606702377913E00E6FFBE /* 1a.cpp */,
+				268606712377913E00E6FFBE /* 1a.hpp */,
+				2698E175237F235800EB73F8 /* hor_conv.cpp */,
+				2698E176237F235800EB73F8 /* hor_conv.hpp */,
+				2698E178237F237800EB73F8 /* vert_conv.cpp */,
+				2698E179237F237800EB73F8 /* vert_conv.hpp */,
 			);
 			path = 18645_Project;
 			sourceTree = "<group>";
@@ -355,14 +367,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					vert_conv.cpp,
+					hor_conv.cpp,
+					1a.cpp,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -414,13 +432,19 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					vert_conv.cpp,
+					hor_conv.cpp,
+					1a.cpp,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
