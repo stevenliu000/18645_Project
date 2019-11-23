@@ -11,66 +11,66 @@
 #include <immintrin.h>
 #include <math.h>
 
-#define load_img_horizontal(src_ptr, n_col, s0, s1, s2, s3, s4, s5, s6, s7) \
-s0 = _mm256_loadu_ps(src_ptr + 0 * n_col); \
-s1 = _mm256_loadu_ps(src_ptr + 1 * n_col); \
-s2 = _mm256_loadu_ps(src_ptr + 2 * n_col); \
-s3 = _mm256_loadu_ps(src_ptr + 3 * n_col); \
-s4 = _mm256_loadu_ps(src_ptr + 4 * n_col); \
-s5 = _mm256_loadu_ps(src_ptr + 5 * n_col); \
-s6 = _mm256_loadu_ps(src_ptr + 6 * n_col); \
-s7 = _mm256_loadu_ps(src_ptr + 7 * n_col); \
+#define load_img_horizontal(src_ptr_h, n_col_h, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h) \
+s0_h = _mm256_load_ps(src_ptr_h + 0 * n_col_h); \
+s1_h = _mm256_load_ps(src_ptr_h + 1 * n_col_h); \
+s2_h = _mm256_load_ps(src_ptr_h + 2 * n_col_h); \
+s3_h = _mm256_load_ps(src_ptr_h + 3 * n_col_h); \
+s4_h = _mm256_load_ps(src_ptr_h + 4 * n_col_h); \
+s5_h = _mm256_load_ps(src_ptr_h + 5 * n_col_h); \
+s6_h = _mm256_load_ps(src_ptr_h + 6 * n_col_h); \
+s7_h = _mm256_load_ps(src_ptr_h + 7 * n_col_h); \
 
-#define load_kernel_horizontal(l_ptr, k) \
-k = _mm256_loadu_ps(l_ptr); \
+#define load_kernel_horizontal(l_ptr_h, k_h) \
+k_h = _mm256_load_ps(l_ptr_h); \
 
-#define mul_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, k) \
-s0 = _mm256_mul_ps(s0, k); \
-s1 = _mm256_mul_ps(s1, k); \
-s2 = _mm256_mul_ps(s2, k); \
-s3 = _mm256_mul_ps(s3, k); \
-s4 = _mm256_mul_ps(s4, k); \
-s5 = _mm256_mul_ps(s5, k); \
-s6 = _mm256_mul_ps(s6, k); \
-s7 = _mm256_mul_ps(s7, k); \
+#define mul_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, k_h) \
+s0_h = _mm256_mul_ps(s0_h, k_h); \
+s1_h = _mm256_mul_ps(s1_h, k_h); \
+s2_h = _mm256_mul_ps(s2_h, k_h); \
+s3_h = _mm256_mul_ps(s3_h, k_h); \
+s4_h = _mm256_mul_ps(s4_h, k_h); \
+s5_h = _mm256_mul_ps(s5_h, k_h); \
+s6_h = _mm256_mul_ps(s6_h, k_h); \
+s7_h = _mm256_mul_ps(s7_h, k_h); \
 
-#define reduce_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, d0) \
-h1 = _mm256_hadd_ps(s0, s1); \
-h4 = _mm256_hadd_ps(s4, s5); \
-h2 = _mm256_hadd_ps(s2, s3); \
-h5 = _mm256_hadd_ps(s6, s7); \
-h3 = _mm256_hadd_ps(h1, h2); \
-h6 = _mm256_hadd_ps(h4, h5); \
-d0[0] += h3[0] + h3[4]; \
-d0[1] += h3[1] + h3[5]; \
-d0[2] += h3[2] + h3[6]; \
-d0[3] += h3[3] + h3[7]; \
-d0[4] += h6[0] + h6[4]; \
-d0[5] += h6[1] + h6[5]; \
-d0[6] += h6[2] + h6[6]; \
-d0[7] += h6[3] + h6[7]; \
+#define reduce_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, d0_h) \
+h1_h = _mm256_hadd_ps(s0_h, s1_h); \
+h4_h = _mm256_hadd_ps(s4_h, s5_h); \
+h2_h = _mm256_hadd_ps(s2_h, s3_h); \
+h5_h = _mm256_hadd_ps(s6_h, s7_h); \
+h3_h = _mm256_hadd_ps(h1_h, h2_h); \
+h6_h = _mm256_hadd_ps(h4_h, h5_h); \
+d0_h[0] += h3_h[0] + h3_h[4]; \
+d0_h[1] += h3_h[1] + h3_h[5]; \
+d0_h[2] += h3_h[2] + h3_h[6]; \
+d0_h[3] += h3_h[3] + h3_h[7]; \
+d0_h[4] += h6_h[0] + h6_h[4]; \
+d0_h[5] += h6_h[1] + h6_h[5]; \
+d0_h[6] += h6_h[2] + h6_h[6]; \
+d0_h[7] += h6_h[3] + h6_h[7]; \
 
-#define store_d_horizantal(d0, dst_prt_tmp, n_col) \
-*(dst_prt_tmp + 0 * n_col) = d0[0]; \
-*(dst_prt_tmp + 1 * n_col) = d0[1]; \
-*(dst_prt_tmp + 2 * n_col) = d0[2]; \
-*(dst_prt_tmp + 3 * n_col) = d0[3]; \
-*(dst_prt_tmp + 4 * n_col) = d0[4]; \
-*(dst_prt_tmp + 5 * n_col) = d0[5]; \
-*(dst_prt_tmp + 6 * n_col) = d0[6]; \
-*(dst_prt_tmp + 7 * n_col) = d0[7]; \
+#define store_d_horizantal(d0_h, dst_prt_tmp_h, n_col_h) \
+*(dst_prt_tmp_h + 0 * n_col_h) = d0_h[0]; \
+*(dst_prt_tmp_h + 1 * n_col_h) = d0_h[1]; \
+*(dst_prt_tmp_h + 2 * n_col_h) = d0_h[2]; \
+*(dst_prt_tmp_h + 3 * n_col_h) = d0_h[3]; \
+*(dst_prt_tmp_h + 4 * n_col_h) = d0_h[4]; \
+*(dst_prt_tmp_h + 5 * n_col_h) = d0_h[5]; \
+*(dst_prt_tmp_h + 6 * n_col_h) = d0_h[6]; \
+*(dst_prt_tmp_h + 7 * n_col_h) = d0_h[7]; \
 
 
-#define horizontal_kernel(src_ptr, n_col, l_ptr, k, s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, dst) \
-load_img_horizontal(src_ptr, n_col, s0, s1, s2, s3, s4, s5, s6, s7) \
-load_kernel_horizontal(l_ptr, k) \
-mul_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, k) \
-reduce_horizontal(s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, dst) \
+#define horizontal_kernel(src_ptr_h, n_col_h, l_ptr_h, k_h, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, dst_h) \
+load_img_horizontal(src_ptr_h, n_col_h, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h) \
+load_kernel_horizontal(l_ptr_h, k_h) \
+mul_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, k_h) \
+reduce_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, dst_h) \
 
-void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr, int dst_row, int dst_col, float* dst_ptr, int ksize, const float* k_ptr) {
-    int i, j, k;
+void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr_h, int dst_row, int dst_col, float* dst_ptr, int ksize, const float* k_ptr) {
+    int i, j, k_h;
     const int num_of_simd_for_one_kernel = (int)ceil(((double)ksize)/8.0);
-//    printf("num_of_simd_for_one_kernel = %i\n", num_of_simd_for_one_kernel);
+    //    printf("num_of_simd_for_one_kernel = %i\n", num_of_simd_for_one_kernel);
     
     //    const int half_ksize = ksize/2;
     const int partial_SIMD_num = ksize - 8 * (num_of_simd_for_one_kernel - 1);
@@ -86,11 +86,11 @@ void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr, int 
     }
     
     
-//    printf("partial_SIMD_num = %i\n", partial_SIMD_num);
+    //    printf("partial_SIMD_num = %i\n", partial_SIMD_num);
     
-    __m256 h1, h2, h3, h4, h5, h6;
-    __m256 s0, s1, s2, s3, s4, s5, s6, s7;
-    __m256 d0;
+    __m256 h1_h, h2_h, h3_h, h4_h, h5_h, h6_h;
+    __m256 s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h;
+    __m256 d0_h;
     __m256 kernel_SIMD;
     
     for (i = 0; i < dst_row; i += 8) {
@@ -99,17 +99,17 @@ void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr, int 
             // printf("j: %i\n",j);
             
             // computational kernel
-            d0 = _mm256_setzero_ps();
+            d0_h = _mm256_setzero_ps();
             // full SIMDs
-            for (k = 0; k < num_of_simd_for_one_kernel; k++) {
-                horizontal_kernel(src_ptr+i*src_col+j+k*8, src_col, (const float*)((&padded_kernel)+k*8), kernel_SIMD, s0, s1, s2, s3, s4, s5, s6, s7, h1, h2, h3, h4, h5, h6, d0);
+            for (k_h = 0; k_h < num_of_simd_for_one_kernel; k_h++) {
+                horizontal_kernel(src_ptr_h+i*src_col+j+k_h*8, src_col, (const float*)((&padded_kernel)+k_h*8), kernel_SIMD, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, d0_h);
             }
-//            for (int cc = 0; cc<8; cc++) {
-//                printf("%f ",d0[cc]);
-//            }
-//            printf("\n");
-//            printf("here!!!!, %i\n\n\n", i*dst_col+j);
-            store_d_horizantal(d0, dst_ptr+i*dst_col+j, dst_col);
+            //            for (int cc = 0; cc<8; cc++) {
+            //                printf("%f ",d0_h[cc]);
+            //            }
+            //            printf("\n");
+            //            printf("here!!!!, %i\n\n\n", i*dst_col+j);
+            store_d_horizantal(d0_h, dst_ptr+i*dst_col+j, dst_col);
         }
     }
 }

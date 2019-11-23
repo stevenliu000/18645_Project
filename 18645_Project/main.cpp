@@ -10,13 +10,7 @@ using namespace std;
 #include "precomp.hpp"
 #include <stdarg.h>
 #include <opencv2/core/hal/hal.hpp>
-
-
-uint64_t rdtsc(){
-    unsigned int lo,hi;
-    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-    return ((uint64_t)hi << 32) | lo;
-}
+// #include "helper.hpp"
 
 
 int timer_helper_subpixel = 10;
@@ -26,6 +20,8 @@ uint64_t cycles_harris = 0;
 long long Extrema_Localization_count = 0;
 long long Adjusting_keypoint_locations_count = 0;
 long long Eliminating_Edge_Responses_count = 0;
+uint64_t cycles_conv = 0;
+uint64_t cycles_mem = 0;
 
 
 namespace cv
@@ -218,7 +214,7 @@ namespace cv
                     {
                         const Mat& src = pyr[o*(nOctaveLayers + 3) + i-1];
 //                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
-                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i]);
+                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i], cycles_conv, cycles_mem);
 
                         int type = src.type();
                         int depth = CV_MAT_DEPTH(type);
@@ -1126,6 +1122,9 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
             end = rdtsc();
             tt = end - start;
             printf("buildGaussianPyramid cycles: %lld\n", tt);
+            printf("buildGaussianPyramid cycles used in mem: %lld\n", cycles_mem);
+            printf("buildGaussianPyramid cycles used in conv: %lld\n", cycles_conv);
+            
             
             start = rdtsc();
             buildDoGPyramid(gpyr, dogpyr); //substract

@@ -9,6 +9,8 @@
 #include <opencv2/core.hpp>
 //#include <opencv2/imgcodecs.hpp>
 //#include <opencv2/highgui.hpp>
+// #include <opencv2/imgproc.hpp>
+// #include <opencv2/highgui.hpp>
 //#include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
 #include <immintrin.h>
@@ -17,8 +19,31 @@
 using namespace std;
 
 #include "1a.hpp"
+#include "helper.hpp"
 #include "vert_conv.cpp"
 #include "hor_conv.cpp"
+
+// float* add_row_padding(float* src, int col_num, int row_num, int ksize) {
+
+//     int pad; float* row_pad;
+//     pad = (ksize - 1)/2;
+//     row_pad =  new float[row_num*(col_num+2*pad)];
+
+//     cv::copyMakeBorder(src,row_pad,col_num+2*pad,col_num+2*pad,row_num,row_num,4);
+
+//     return row_pad;
+// }
+
+// float* add_col_padding(float* src, int col_num, int row_num,int ksize) {
+
+//     int pad; float* col_pad;
+//     pad = (ksize - 1)/2;
+//     col_pad =  new float[col_num * (row_num + 2 * pad)];
+
+//     cv::copyMakeBorder(src,col_pad,col_num,col_num,row_num+2*pad,row_num+2*pad,4);
+
+//     return col_pad;
+// }
 
 /*
  * add_row_padding
@@ -231,29 +256,40 @@ void createGaussianKernels( T & kx, T & ky, int type, Size &ksize,
 //}
 
 void conv2d_modified(Mat& _src, Mat& _dst,
-                     Mat& kx, Mat& ky,
+                     Mat& kx, Mat& ky, uint64_t &cycles_conv, uint64_t &cycles_mem,
                      int borderType = BORDER_DEFAULT) {
     float *kx_ptr = kx.ptr<float>();
     float *ky_ptr = ky.ptr<float>();
     float *src = _src.ptr<float>();
     float *dst = _dst.ptr<float>();
     
+    uint64_t start, end;
+
     int k_len = max(kx.cols, kx.rows);
 
     /*  /----/
      *  /----/
      */
-    float *src_row_padding = add_row_padding(src, static_cast<int>(_src.cols), k_len);
+    start = rdtsc();
+    float *src_row_padding = add_row_padding(src, static_cast<int>(_dst.cols), k_len);
+    end = rdtsc();
+    cycles_mem += end-start;
+    start = rdtsc();
     horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
-    
+    end = rdtsc();
+    cycles_conv += end-start;
     /*  |-|
      *  | |
      *  |-|
      */
-    
-    float *src_col_padding = add_col_padding(dst, static_cast<int>(_src.rows), k_len);
+    start = rdtsc();
+    float *src_col_padding = add_col_padding(dst, static_cast<int>(_dst.rows), k_len);
+    end = rdtsc();
+    cycles_mem += end-start;
+    start = rdtsc();
     vertical_kernel_conv(_src.rows+k_len-1, _src.cols, src_col_padding, _dst.rows, _dst.cols, dst, k_len, ky_ptr);
-    
+    end = rdtsc();
+    cycles_conv += end-start;
 //    delete src_row_padding;
 //    delete src_col_padding;
 }
@@ -262,7 +298,7 @@ void conv2d_modified(Mat& _src, Mat& _dst,
  * sepFilter2D_modified: call conv2d_modified
  */
 void sepFilter2D_modified(Mat& src, Mat& dst, Mat& kx, Mat& ky, 
-                          int borderType) {
+                          int borderType, uint64_t &cycles_conv, uint64_t &cycles_mem) {
                           
                           
 //                          int stype, int dtype, int ktype,
@@ -279,13 +315,13 @@ void sepFilter2D_modified(Mat& src, Mat& dst, Mat& kx, Mat& ky,
 //                                                      delta, borderType & ~BORDER_ISOLATED);
 //    Mat src(Size(width, height), stype, src_data, src_step);
 //    Mat dst(Size(width, height), dtype, dst_data, dst_step);
-    conv2d_modified(src, dst, kx, ky);
+    conv2d_modified(src, dst, kx, ky, cycles_conv, cycles_mem);
 //    f->apply(src, dst, Size(full_width, full_height), Point(offset_x, offset_y));
 }
 
 
 void GaussianBlur_modified(InputArray _src, OutputArray _dst, Size ksize,
-                           double sigma1, double sigma2,
+                           double sigma1, double sigma2, uint64_t &cycles_conv, uint64_t &cycles_mem, 
                        int borderType = BORDER_DEFAULT ) {
     int type = _src.type();
     Size size = _src.size();
@@ -321,5 +357,5 @@ void GaussianBlur_modified(InputArray _src, OutputArray _dst, Size ksize,
 
 //    sepFilter2D_modified(src, dst, sdepth, kx, ky, Point(-1, -1), 0, borderType);
 //
-    sepFilter2D_modified(src, dst, kx, ky, borderType);
+    sepFilter2D_modified(src, dst, kx, ky, borderType, cycles_conv, cycles_mem);
 }
