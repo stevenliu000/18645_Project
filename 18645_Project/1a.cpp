@@ -270,14 +270,14 @@ void conv2d_modified(Mat& _src, Mat& _dst,
     /*  /----/
      *  /----/
      */
-    start = rdtsc();
+    // start = rdtsc();
     float *src_row_padding = add_row_padding(src, static_cast<int>(_dst.cols), k_len);
-    end = rdtsc();
-    cycles_mem += end-start;
-    start = rdtsc();
+    // end = rdtsc();
+    // cycles_mem += end-start;
+    // start = rdtsc();
     horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
-    end = rdtsc();
-    cycles_conv += end-start;
+    // end = rdtsc();
+    // cycles_conv += end-start;
     /*  |-|
      *  | |
      *  |-|

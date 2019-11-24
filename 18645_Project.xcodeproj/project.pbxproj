@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2663C9E02389EBB800ECA3C9 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2663C9DF2389EBB800ECA3C9 /* libomp.dylib */; };
 		26ACD91523563C330093EFB2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26ACD91423563C330093EFB2 /* main.cpp */; };
 		26ACD94C235640AB0093EFB2 /* libopencv_tracking.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91D235640A70093EFB2 /* libopencv_tracking.4.1.1.dylib */; };
 		26ACD94D235640AB0093EFB2 /* libopencv_surface_matching.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91E235640A70093EFB2 /* libopencv_surface_matching.4.1.1.dylib */; };
@@ -70,6 +71,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2663C9DF2389EBB800ECA3C9 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../usr/local/Cellar/llvm/9.0.0_1/lib/libomp.dylib; sourceTree = "<group>"; };
 		268606702377913E00E6FFBE /* 1a.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 1a.cpp; sourceTree = "<group>"; };
 		268606712377913E00E6FFBE /* 1a.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = 1a.hpp; sourceTree = "<group>"; };
 		2698E175237F235800EB73F8 /* hor_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hor_conv.cpp; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				26ACD963235640AC0093EFB2 /* libopencv_ccalib.4.1.1.dylib in Frameworks */,
 				26ACD96B235640AC0093EFB2 /* libopencv_core.4.1.1.dylib in Frameworks */,
 				26ACD961235640AC0093EFB2 /* libopencv_quality.4.1.1.dylib in Frameworks */,
+				2663C9E02389EBB800ECA3C9 /* libomp.dylib in Frameworks */,
 				26ACD959235640AB0093EFB2 /* libopencv_objdetect.4.1.1.dylib in Frameworks */,
 				26ACD968235640AC0093EFB2 /* libopencv_fuzzy.4.1.1.dylib in Frameworks */,
 				26ACD975235640AC0093EFB2 /* libopencv_line_descriptor.4.1.1.dylib in Frameworks */,
@@ -186,12 +189,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2663C9DE2389EBB800ECA3C9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2663C9DF2389EBB800ECA3C9 /* libomp.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		26ACD90823563C330093EFB2 = {
 			isa = PBXGroup;
 			children = (
 				26ACD91C23563FB00093EFB2 /* Dynamic Library */,
 				26ACD91323563C330093EFB2 /* 18645_Project */,
 				26ACD91223563C330093EFB2 /* Products */,
+				2663C9DE2389EBB800ECA3C9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -461,9 +473,15 @@
 		26ACD91923563C330093EFB2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = /usr/local/opt/llvm/bin/clang;
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				COMPILER_INDEX_STORE_ENABLE = NO;
 				FRAMEWORK_SEARCH_PATHS = "/usr/local/lib/**";
-				HEADER_SEARCH_PATHS = "/usr/local/include/**";
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/**",
+					/usr/local/opt/llvm/lib/clang/9.0.0/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/lib/**",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
@@ -513,7 +531,10 @@
 					"$(PROJECT_DIR)/Dynamic\\ Library",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
+					/usr/local/opt/llvm/lib,
+					/usr/local/Cellar/llvm/9.0.0_1/lib,
 				);
+				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -521,9 +542,15 @@
 		26ACD91A23563C330093EFB2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = /usr/local/opt/llvm/bin/clang;
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				COMPILER_INDEX_STORE_ENABLE = NO;
 				FRAMEWORK_SEARCH_PATHS = "/usr/local/lib/**";
-				HEADER_SEARCH_PATHS = "/usr/local/include/**";
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/**",
+					/usr/local/opt/llvm/lib/clang/9.0.0/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/lib/**",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
@@ -573,7 +600,10 @@
 					"$(PROJECT_DIR)/Dynamic\\ Library",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
 					"$(PROJECT_DIR)/Dynamic\\ Library",
+					/usr/local/opt/llvm/lib,
+					/usr/local/Cellar/llvm/9.0.0_1/lib,
 				);
+				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

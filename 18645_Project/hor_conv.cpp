@@ -11,18 +11,20 @@
 #include <immintrin.h>
 #include <math.h>
 
+using namespace std;
+
 #define load_img_horizontal(src_ptr_h, n_col_h, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h) \
-s0_h = _mm256_load_ps(src_ptr_h + 0 * n_col_h); \
-s1_h = _mm256_load_ps(src_ptr_h + 1 * n_col_h); \
-s2_h = _mm256_load_ps(src_ptr_h + 2 * n_col_h); \
-s3_h = _mm256_load_ps(src_ptr_h + 3 * n_col_h); \
-s4_h = _mm256_load_ps(src_ptr_h + 4 * n_col_h); \
-s5_h = _mm256_load_ps(src_ptr_h + 5 * n_col_h); \
-s6_h = _mm256_load_ps(src_ptr_h + 6 * n_col_h); \
-s7_h = _mm256_load_ps(src_ptr_h + 7 * n_col_h); \
+s0_h = _mm256_loadu_ps(src_ptr_h + 0 * n_col_h); \
+s1_h = _mm256_loadu_ps(src_ptr_h + 1 * n_col_h); \
+s2_h = _mm256_loadu_ps(src_ptr_h + 2 * n_col_h); \
+s3_h = _mm256_loadu_ps(src_ptr_h + 3 * n_col_h); \
+s4_h = _mm256_loadu_ps(src_ptr_h + 4 * n_col_h); \
+s5_h = _mm256_loadu_ps(src_ptr_h + 5 * n_col_h); \
+s6_h = _mm256_loadu_ps(src_ptr_h + 6 * n_col_h); \
+s7_h = _mm256_loadu_ps(src_ptr_h + 7 * n_col_h); \
 
 #define load_kernel_horizontal(l_ptr_h, k_h) \
-k_h = _mm256_load_ps(l_ptr_h); \
+k_h = _mm256_loadu_ps(l_ptr_h); \
 
 #define mul_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, k_h) \
 s0_h = _mm256_mul_ps(s0_h, k_h); \
@@ -68,12 +70,12 @@ mul_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, k_h) \
 reduce_horizontal(s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, dst_h) \
 
 void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr_h, int dst_row, int dst_col, float* dst_ptr, int ksize, const float* k_ptr) {
-    int i, j, k_h;
+    int i, j, k;
     const int num_of_simd_for_one_kernel = (int)ceil(((double)ksize)/8.0);
-    //    printf("num_of_simd_for_one_kernel = %i\n", num_of_simd_for_one_kernel);
+//    printf("num_of_simd_for_one_kernel = %i\n", num_of_simd_for_one_kernel);
     
     //    const int half_ksize = ksize/2;
-    const int partial_SIMD_num = ksize - 8 * (num_of_simd_for_one_kernel - 1);
+//    const int partial_SIMD_num = ksize - 8 * (num_of_simd_for_one_kernel - 1);
     
     float padded_kernel[num_of_simd_for_one_kernel*8];
     
@@ -86,29 +88,23 @@ void horizontal_kernel_conv(int src_row, int src_col, const float* src_ptr_h, in
     }
     
     
-    //    printf("partial_SIMD_num = %i\n", partial_SIMD_num);
-    
     __m256 h1_h, h2_h, h3_h, h4_h, h5_h, h6_h;
     __m256 s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h;
     __m256 d0_h;
-    __m256 kernel_SIMD;
+    __m256 k_h;
     
     for (i = 0; i < dst_row; i += 8) {
-        // printf("i: %i\n",i);
         for (j = 0; j < dst_col; j += 1) {
-            // printf("j: %i\n",j);
             
             // computational kernel
             d0_h = _mm256_setzero_ps();
             // full SIMDs
-            for (k_h = 0; k_h < num_of_simd_for_one_kernel; k_h++) {
-                horizontal_kernel(src_ptr_h+i*src_col+j+k_h*8, src_col, (const float*)((&padded_kernel)+k_h*8), kernel_SIMD, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, d0_h);
+            for (k = 0; k < num_of_simd_for_one_kernel; k++) {
+                horizontal_kernel(src_ptr_h+i*src_col+j+k*8, src_col, (float*)(&padded_kernel[k*8]), k_h, s0_h, s1_h, s2_h, s3_h, s4_h, s5_h, s6_h, s7_h, h1_h, h2_h, h3_h, h4_h, h5_h, h6_h, d0_h);
+                
+//                printf("s0: %f %f %f %f %f %f %f %f\n", s0_h[0], s0_h[1], s0_h[2], s0_h[3], s0_h[4], s0_h[5], s0_h[6], s0_h[7]);
+//                printf("s1: %f %f %f %f %f %f %f %f\n", s1_h[0], s1_h[1], s1_h[2], s1_h[3], s1_h[4], s1_h[5], s1_h[6], s1_h[7]);
             }
-            //            for (int cc = 0; cc<8; cc++) {
-            //                printf("%f ",d0_h[cc]);
-            //            }
-            //            printf("\n");
-            //            printf("here!!!!, %i\n\n\n", i*dst_col+j);
             store_d_horizantal(d0_h, dst_ptr+i*dst_col+j, dst_col);
         }
     }
