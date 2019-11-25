@@ -20,6 +20,7 @@ using namespace std;
 
 #include "1a.hpp"
 #include "helper.hpp"
+#include "index_transform.hpp"
 #include "vert_conv.cpp"
 #include "hor_conv.cpp"
 
@@ -260,34 +261,46 @@ void conv2d_modified(Mat& _src, Mat& _dst,
                      int borderType = BORDER_DEFAULT) {
     float *kx_ptr = kx.ptr<float>();
     float *ky_ptr = ky.ptr<float>();
+//    Mat _tranposed = _src.t();
+//    float *tranposed = _tranposed.ptr<float>();
     float *src = _src.ptr<float>();
     float *dst = _dst.ptr<float>();
+    
+  
     
     uint64_t start, end;
 
     int k_len = max(kx.cols, kx.rows);
 
+    Mat _tmp(_src.rows, _src.cols, CV_32F);
+    float *tmp = _tmp.ptr<float>();
     /*  /----/
      *  /----/
      */
-    // start = rdtsc();
-    float *src_row_padding = add_row_padding(src, static_cast<int>(_dst.cols), k_len);
-    // end = rdtsc();
-    // cycles_mem += end-start;
-    // start = rdtsc();
-    horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
+    
+    
+    
+    vertical_kernel_conv(_src.rows+k_len-1, _src.cols, src, _dst.rows, _dst.cols, tmp, k_len, ky_ptr);
+//    _tranposed = _dst.t();
+    
+//    start = rdtsc();
+//    float *src_row_padding = add_row_padding(src, static_cast<int>(_dst.cols), k_len);
+//    end = rdtsc();
+//    cycles_mem += end-start;
+//    // start = rdtsc();
+//    horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
     // end = rdtsc();
     // cycles_conv += end-start;
     /*  |-|
      *  | |
      *  |-|
      */
+    // start = rdtsc();
+    // float *src_col_padding = add_col_padding(dst, static_cast<int>(_dst.rows), k_len);
+    // end = rdtsc();
+    // cycles_mem += end-start;
     start = rdtsc();
-    float *src_col_padding = add_col_padding(dst, static_cast<int>(_dst.rows), k_len);
-    end = rdtsc();
-    cycles_mem += end-start;
-    start = rdtsc();
-    vertical_kernel_conv(_src.rows+k_len-1, _src.cols, src_col_padding, _dst.rows, _dst.cols, dst, k_len, ky_ptr);
+    vertical_kernel_conv(_src.rows+k_len-1, _src.cols, tmp, _dst.rows, _dst.cols, dst, k_len, ky_ptr);
     end = rdtsc();
     cycles_conv += end-start;
 //    delete src_row_padding;

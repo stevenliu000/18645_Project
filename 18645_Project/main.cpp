@@ -213,8 +213,8 @@ namespace cv
                     else
                     {
                         const Mat& src = pyr[o*(nOctaveLayers + 3) + i-1];
-//                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
-                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i], cycles_conv, cycles_mem);
+                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
+//                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i], cycles_conv, cycles_mem);
 
                         int type = src.type();
                         int depth = CV_MAT_DEPTH(type);
