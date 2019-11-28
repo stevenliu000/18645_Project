@@ -22,6 +22,8 @@ long long Adjusting_keypoint_locations_count = 0;
 long long Eliminating_Edge_Responses_count = 0;
 uint64_t cycles_conv = 0;
 uint64_t cycles_mem = 0;
+uint64_t buildGaussianPyramidCycles = 0;
+uint64_t buildDoGCycles = 0;
 
 
 namespace cv
@@ -215,7 +217,7 @@ namespace cv
                         const Mat& src = pyr[o*(nOctaveLayers + 3) + i-1];
                         GaussianBlur(src, dst, Size(), sig[i], sig[i]);
 //                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i], cycles_conv, cycles_mem);
-
+//
                         int type = src.type();
                         int depth = CV_MAT_DEPTH(type);
                         int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
@@ -1121,6 +1123,7 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
             buildGaussianPyramid(base, gpyr, nOctaves); // gaussian blur
             end = rdtsc();
             tt = end - start;
+            buildGaussianPyramidCycles += tt;
             printf("buildGaussianPyramid cycles: %lld\n", tt);
             printf("buildGaussianPyramid cycles used in mem: %lld\n", cycles_mem);
             printf("buildGaussianPyramid cycles used in conv: %lld\n", cycles_conv);
@@ -1131,6 +1134,7 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
             end = rdtsc();
             tt = end - start;
             printf("buildDoGPyramid cycles: %lld\n", tt);
+            buildDoGCycles += tt;
             //
             //            t = (double)getTickCount() - t;
             //            printf("pyramid construction time: %g\n", t*1000./tf);
@@ -1205,35 +1209,40 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
 
 int main( int argc, char** argv )
 {
-    cv::Mat input = cv::imread("/Users/stevenliu/Downloads/demo1024.JPG", 0); //Load as grayscale
-    resize(input, input, Size(1024, 1024));
+                    
+    for (int iters = 0; iters < 128; iters++) {
+       cv::Mat input = cv::imread("/Users/stevenliu/Downloads/demo1024.JPG", 0); //Load as grayscale
+       resize(input, input, Size(1024, 1024));
 
 
-    printf("Arguments: \n");
-    printf("nfeatures: %i \n", 0);
-    printf("nOctaveLayers: %i \n", 3);
-    printf("contrastThreshold: %f \n", 0.04);
-    printf("edgeThreshold: %i \n", 10);
-    printf("sigma: %f \n", 1.6);
-    printf("\n");
+       printf("Arguments: \n");
+       printf("nfeatures: %i \n", 0);
+       printf("nOctaveLayers: %i \n", 3);
+       printf("contrastThreshold: %f \n", 0.04);
+       printf("edgeThreshold: %i \n", 10);
+       printf("sigma: %f \n", 1.6);
+       printf("\n");
 
-    Mat output;
-    Mat mask = Mat();
+       Mat output;
+       Mat mask = Mat();
 
-    cv::Ptr<Feature2D> f2d = xfeatures2d::SIFT::create();
+       cv::Ptr<Feature2D> f2d = xfeatures2d::SIFT::create();
 
-    cv::xfeatures2d::SIFT_Impl sift_instance = cv::xfeatures2d::SIFT_Impl();
+       cv::xfeatures2d::SIFT_Impl sift_instance = cv::xfeatures2d::SIFT_Impl();
 
-    std::vector<KeyPoint> keypoints_1;
-    std::vector<KeyPoint> keypoints_2;
+       std::vector<KeyPoint> keypoints_1;
+       std::vector<KeyPoint> keypoints_2;
 
-    printf("Input Size is %i, %i \n",input.rows,input.cols);
-    sift_instance.detectAndCompute(input, mask, keypoints_2, output);
+       printf("Input Size is %i, %i \n",input.rows,input.cols);
+       sift_instance.detectAndCompute(input, mask, keypoints_2, output);
+    }
+    
+    printf("\n\n\nn\n\n\n %lld, %lld", buildGaussianPyramidCycles >> 7, buildDoGCycles >> 7);
     //    f2d->detect( input, keypoints_1 );
 
-    cv::drawKeypoints(input, keypoints_2, input);
-    namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
-    imshow( "Display window", input );                // Show our image inside it.
+//    cv::drawKeypoints(input, keypoints_2, input);
+//    namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
+//    imshow( "Display window", input );                // Show our image inside it.
 
 //    delete(your_matrix);
     waitKey(0);

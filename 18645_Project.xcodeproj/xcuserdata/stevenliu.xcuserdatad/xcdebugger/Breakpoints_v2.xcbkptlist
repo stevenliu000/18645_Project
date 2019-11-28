@@ -14,8 +14,8 @@
             filePath = "18645_Project/vert_conv.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "389"
-            endingLineNumber = "389"
+            startingLineNumber = "388"
+            endingLineNumber = "388"
             landmarkName = "vertical_kernel_conv(src_row, src_col, src_ptr_v, dst_row, dst_col, dst_ptr_v, ksize, k_ptr_v)"
             landmarkType = "9">
          </BreakpointContent>
