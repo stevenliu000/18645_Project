@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2663C9E02389EBB800ECA3C9 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2663C9DF2389EBB800ECA3C9 /* libomp.dylib */; };
-		26ACD91523563C330093EFB2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26ACD91423563C330093EFB2 /* main.cpp */; };
+		26ACD91523563C330093EFB2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26ACD91423563C330093EFB2 /* main.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
 		26ACD94C235640AB0093EFB2 /* libopencv_tracking.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91D235640A70093EFB2 /* libopencv_tracking.4.1.1.dylib */; };
 		26ACD94D235640AB0093EFB2 /* libopencv_surface_matching.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91E235640A70093EFB2 /* libopencv_surface_matching.4.1.1.dylib */; };
 		26ACD94E235640AB0093EFB2 /* libopencv_structured_light.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91F235640A70093EFB2 /* libopencv_structured_light.4.1.1.dylib */; };
@@ -379,7 +379,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -408,6 +408,11 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-ffp-contract=fast",
+					"-mfma",
+					"-mavx2",
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -444,7 +449,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -466,6 +471,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = (
+					"-ffp-contract=fast",
+					"-mfma",
+					"-mavx2",
+				);
 				SDKROOT = macosx;
 			};
 			name = Release;
