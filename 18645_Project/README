@@ -1,3 +1,8 @@
 Main.cpp contains the main SIFT implementation which is from OpenCV. The kernel
 for convolution with column filter is defined in vert_conv.cpp. The kernel for
 matrix-matrix substraction is defined in GaussianBlur_modified.cpp.
+
+In the main.cpp, for gaussian blur, we are replacing OpenCV's implementation 
+GuassianBlur in line 210 with our version GaussianBlur_modified in line 211.
+For matrix-matrix substraction, we are replacing OpenCV's implementation
+subtract in line 242 with our version substraction_kernel in line 242.
