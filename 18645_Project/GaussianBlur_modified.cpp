@@ -1,114 +1,16 @@
-//
-//  1a.cpp
-//  18645_Project
-//
-//  Created by Steven Liu on 11/9/19.
-//  Copyright © 2019 Steven Liu. All rights reserved.
-//
+
+#include "GaussianBlur_modified.hpp"
 
 #include <opencv2/core.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/highgui.hpp>
-// #include <opencv2/imgproc.hpp>
-// #include <opencv2/highgui.hpp>
-//#include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
 #include <immintrin.h>
 #include <math.h>
+#include "helper.hpp"
+#include "vert_conv.hpp"
 
 using namespace std;
-
-#include "1a.hpp"
-#include "helper.hpp"
-#include "index_transform.hpp"
-#include "vert_conv.cpp"
-#include "hor_conv.cpp"
-
-// float* add_row_padding(float* src, int col_num, int row_num, int ksize) {
-
-//     int pad; float* row_pad;
-//     pad = (ksize - 1)/2;
-//     row_pad =  new float[row_num*(col_num+2*pad)];
-
-//     cv::copyMakeBorder(src,row_pad,col_num+2*pad,col_num+2*pad,row_num,row_num,4);
-
-//     return row_pad;
-// }
-
-// float* add_col_padding(float* src, int col_num, int row_num,int ksize) {
-
-//     int pad; float* col_pad;
-//     pad = (ksize - 1)/2;
-//     col_pad =  new float[col_num * (row_num + 2 * pad)];
-
-//     cv::copyMakeBorder(src,col_pad,col_num,col_num,row_num+2*pad,row_num+2*pad,4);
-
-//     return col_pad;
-// }
-
-/*
- * add_row_padding
- * 
- * input: src - pointer to src
- * 
- * output: pointer to new src with padding (using malloc in function)
- */
-float* add_row_padding(float* src, int width, int ksize) {
-    int pad, p_width;
-    pad = (ksize - 1)/2;
-    p_width = width + 2 * pad;
-    
-    float* row;
-    row =  new float[width * p_width + 8];
-    
-    for (int i = 0; i != width; ++i){
-        for (int j = 0; j != p_width; ++j){
-            if (j < pad) {
-                row[i*p_width+j] = src[i * width + pad - j];
-            } else if (j >= (width + pad)) {
-                row[i*p_width+j] = src[i * width + pad + 2*(width-1) - j];
-            } else {
-                row[i*p_width+j] = src[i * width + j - pad];
-            }
-        }
-    }
-    return row;
-}
-
-/*
- * add_col_padding
- * 
- * input: src - pointer to src
- * 
- * output: pointer to new src with padding (using malloc in function)
- */
-float* add_col_padding(float* src, int length,int ksize) {
-    int pad, p_length;
-    pad = (ksize - 1)/2;
-    p_length = length + 2 * pad;
-    
-    float* col;
-    col =  new float[length * p_length];
-    
-    for (int i = 0; i != p_length; ++i) {
-        if (i < pad) {
-            for (int j = 0; j != length; ++j) {
-                col[i*length+j] = src[(pad-i) * length + j];
-            }
-        } else if (i >= (length + pad)) {
-            for (int j = 0; j != length; ++j) {
-                col[i*length+j] = src[(pad + 2*(length-1) - i) * length + j];
-            }
-        } else {
-            for (int j = 0; j != length; ++j) {
-                col[i*length+j] = src[(i-pad) * length + j];
-            }
-        }
-    }
-    return col;
-}
-
 using namespace cv;
+
 Mat getGaussianKernel(int n, double sigma, int ktype)
 {
     CV_Assert(n > 0);
@@ -186,8 +88,6 @@ void createGaussianKernels( T & kx, T & ky, int type, Size &ksize,
     kx = getGaussianKernel( ksize.width, sigma1, std::max(depth, CV_32F));
     if( ksize.height == ksize.width && std::abs(sigma1 - sigma2) < DBL_EPSILON )
         ky = kx;
-//    else
-//        getGaussianKernel( ksize.height, sigma2, std::max(depth, CV_32F), ky );
 }
 
 //Ptr<FilterEngine> createSeparableLinearFilter(
@@ -257,85 +157,32 @@ void createGaussianKernels( T & kx, T & ky, int type, Size &ksize,
 //}
 
 void conv2d_modified(Mat& _src, Mat& _dst,
-                     Mat& kx, Mat& ky, uint64_t &cycles_conv, uint64_t &cycles_mem,
-                     int borderType = BORDER_DEFAULT) {
+                     Mat& kx, Mat& ky, int borderType = BORDER_DEFAULT) {
     float *kx_ptr = kx.ptr<float>();
     float *ky_ptr = ky.ptr<float>();
-//    Mat _tranposed = _src.t();
-//    float *tranposed = _tranposed.ptr<float>();
+
     float *src = _src.ptr<float>();
     float *dst = _dst.ptr<float>();
     
-  
-    
-    uint64_t start, end;
-
     int k_len = max(kx.cols, kx.rows);
 
     Mat _tmp(_src.rows, _src.cols, CV_32F);
     float *tmp = _tmp.ptr<float>();
-    /*  /----/
-     *  /----/
-     */
-    
-    
-    
+
     vertical_kernel_conv(_src.rows+k_len-1, _src.cols, src, _dst.rows, _dst.cols, tmp, k_len, ky_ptr);
-//    _tranposed = _dst.t();
-    
-//    start = rdtsc();
-//    float *src_row_padding = add_row_padding(src, static_cast<int>(_dst.cols), k_len);
-//    end = rdtsc();
-//    cycles_mem += end-start;
-//    // start = rdtsc();
-//    horizontal_kernel_conv(_src.rows, _src.cols+k_len-1, src_row_padding, _dst.rows, _dst.cols, dst, k_len, kx_ptr);
-    // end = rdtsc();
-    // cycles_conv += end-start;
-    /*  |-|
-     *  | |
-     *  |-|
-     */
-    // start = rdtsc();
-    // float *src_col_padding = add_col_padding(dst, static_cast<int>(_dst.rows), k_len);
-    // end = rdtsc();
-    // cycles_mem += end-start;
-    start = rdtsc();
     vertical_kernel_conv(_src.rows+k_len-1, _src.cols, tmp, _dst.rows, _dst.cols, dst, k_len, ky_ptr);
-    end = rdtsc();
-    cycles_conv += end-start;
-//    delete src_row_padding;
-//    delete src_col_padding;
 }
 
 /*
  * sepFilter2D_modified: call conv2d_modified
  */
-void sepFilter2D_modified(Mat& src, Mat& dst, Mat& kx, Mat& ky, 
-                          int borderType, uint64_t &cycles_conv, uint64_t &cycles_mem) {
-                          
-                          
-//                          int stype, int dtype, int ktype,
-//                          uchar* src_data, size_t src_step, uchar* dst_data, size_t dst_step,
-//                          int width, int height, int full_width, int full_height,
-//                          int offset_x, int offset_y,
-//                          uchar * kernelx_data, int kernelx_len,
-//                          uchar * kernely_data, int kernely_len,
-//                          int anchor_x, int anchor_y, double delta, int borderType) {
-//    Mat kernelX(Size(kernelx_len, 1), ktype, kernelx_data);
-//    Mat kernelY(Size(kernely_len, 1), ktype, kernely_data);
-//    Ptr<FilterEngine> f = createSeparableLinearFilter(stype, dtype, kernelX, kernelY,
-//                                                      Point(anchor_x, anchor_y),
-//                                                      delta, borderType & ~BORDER_ISOLATED);
-//    Mat src(Size(width, height), stype, src_data, src_step);
-//    Mat dst(Size(width, height), dtype, dst_data, dst_step);
-    conv2d_modified(src, dst, kx, ky, cycles_conv, cycles_mem);
-//    f->apply(src, dst, Size(full_width, full_height), Point(offset_x, offset_y));
+void sepFilter2D_modified(Mat& src, Mat& dst, Mat& kx, Mat& ky, int borderType) {
+    conv2d_modified(src, dst, kx, ky);
 }
 
 
 void GaussianBlur_modified(InputArray _src, OutputArray _dst, Size ksize,
-                           double sigma1, double sigma2, uint64_t &cycles_conv, uint64_t &cycles_mem, 
-                       int borderType = BORDER_DEFAULT ) {
+                           double sigma1, double sigma2, int borderType) {
     int type = _src.type();
     Size size = _src.size();
     _dst.create( size, type );
@@ -368,7 +215,5 @@ void GaussianBlur_modified(InputArray _src, OutputArray _dst, Size ksize,
     if(!(borderType & BORDER_ISOLATED))
         src.locateROI( wsz, ofs );
 
-//    sepFilter2D_modified(src, dst, sdepth, kx, ky, Point(-1, -1), 0, borderType);
-//
-    sepFilter2D_modified(src, dst, kx, ky, borderType, cycles_conv, cycles_mem);
+    sepFilter2D_modified(src, dst, kx, ky, borderType);
 }

@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		2663C9E02389EBB800ECA3C9 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2663C9DF2389EBB800ECA3C9 /* libomp.dylib */; };
+		26A0B8B8239AFE6500454A19 /* vert_conv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A0B8B6239AFE6500454A19 /* vert_conv.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
+		26A0B8C7239AFF1D00454A19 /* helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A0B8C5239AFF1D00454A19 /* helper.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
+		26A0B8CA239AFFAC00454A19 /* substraction_kernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A0B8C8239AFFAC00454A19 /* substraction_kernel.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
+		26A0B8D0239B12C200454A19 /* GaussianBlur_modified.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A0B8CE239B12C100454A19 /* GaussianBlur_modified.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
 		26ACD91523563C330093EFB2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26ACD91423563C330093EFB2 /* main.cpp */; settings = {COMPILER_FLAGS = "-O2 -mavx2 -mfma -ffp-contract=fast"; }; };
 		26ACD94C235640AB0093EFB2 /* libopencv_tracking.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91D235640A70093EFB2 /* libopencv_tracking.4.1.1.dylib */; };
 		26ACD94D235640AB0093EFB2 /* libopencv_surface_matching.4.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26ACD91E235640A70093EFB2 /* libopencv_surface_matching.4.1.1.dylib */; };
@@ -72,12 +76,14 @@
 
 /* Begin PBXFileReference section */
 		2663C9DF2389EBB800ECA3C9 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../usr/local/Cellar/llvm/9.0.0_1/lib/libomp.dylib; sourceTree = "<group>"; };
-		268606702377913E00E6FFBE /* 1a.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 1a.cpp; sourceTree = "<group>"; };
-		268606712377913E00E6FFBE /* 1a.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = 1a.hpp; sourceTree = "<group>"; };
-		2698E175237F235800EB73F8 /* hor_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hor_conv.cpp; sourceTree = "<group>"; };
-		2698E176237F235800EB73F8 /* hor_conv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = hor_conv.hpp; sourceTree = "<group>"; };
-		2698E178237F237800EB73F8 /* vert_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vert_conv.cpp; sourceTree = "<group>"; };
-		2698E179237F237800EB73F8 /* vert_conv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vert_conv.hpp; sourceTree = "<group>"; };
+		26A0B8B6239AFE6500454A19 /* vert_conv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vert_conv.cpp; sourceTree = "<group>"; };
+		26A0B8B7239AFE6500454A19 /* vert_conv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vert_conv.hpp; sourceTree = "<group>"; };
+		26A0B8C5239AFF1D00454A19 /* helper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = helper.cpp; sourceTree = "<group>"; };
+		26A0B8C6239AFF1D00454A19 /* helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = helper.hpp; sourceTree = "<group>"; };
+		26A0B8C8239AFFAC00454A19 /* substraction_kernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = substraction_kernel.cpp; sourceTree = "<group>"; };
+		26A0B8C9239AFFAC00454A19 /* substraction_kernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = substraction_kernel.hpp; sourceTree = "<group>"; };
+		26A0B8CE239B12C100454A19 /* GaussianBlur_modified.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GaussianBlur_modified.cpp; sourceTree = "<group>"; };
+		26A0B8CF239B12C100454A19 /* GaussianBlur_modified.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GaussianBlur_modified.hpp; sourceTree = "<group>"; };
 		26ACD91123563C330093EFB2 /* 18645_Project */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 18645_Project; sourceTree = BUILT_PRODUCTS_DIR; };
 		26ACD91423563C330093EFB2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		26ACD91B23563FA10093EFB2 /* precomp.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = precomp.hpp; sourceTree = "<group>"; };
@@ -218,14 +224,16 @@
 		26ACD91323563C330093EFB2 /* 18645_Project */ = {
 			isa = PBXGroup;
 			children = (
+				26A0B8C8239AFFAC00454A19 /* substraction_kernel.cpp */,
+				26A0B8C9239AFFAC00454A19 /* substraction_kernel.hpp */,
+				26A0B8C5239AFF1D00454A19 /* helper.cpp */,
+				26A0B8C6239AFF1D00454A19 /* helper.hpp */,
+				26A0B8B6239AFE6500454A19 /* vert_conv.cpp */,
+				26A0B8B7239AFE6500454A19 /* vert_conv.hpp */,
 				26ACD91B23563FA10093EFB2 /* precomp.hpp */,
 				26ACD91423563C330093EFB2 /* main.cpp */,
-				268606702377913E00E6FFBE /* 1a.cpp */,
-				268606712377913E00E6FFBE /* 1a.hpp */,
-				2698E175237F235800EB73F8 /* hor_conv.cpp */,
-				2698E176237F235800EB73F8 /* hor_conv.hpp */,
-				2698E178237F237800EB73F8 /* vert_conv.cpp */,
-				2698E179237F237800EB73F8 /* vert_conv.hpp */,
+				26A0B8CE239B12C100454A19 /* GaussianBlur_modified.cpp */,
+				26A0B8CF239B12C100454A19 /* GaussianBlur_modified.hpp */,
 			);
 			path = 18645_Project;
 			sourceTree = "<group>";
@@ -340,7 +348,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26A0B8B8239AFE6500454A19 /* vert_conv.cpp in Sources */,
+				26A0B8CA239AFFAC00454A19 /* substraction_kernel.cpp in Sources */,
+				26A0B8D0239B12C200454A19 /* GaussianBlur_modified.cpp in Sources */,
 				26ACD91523563C330093EFB2 /* main.cpp in Sources */,
+				26A0B8C7239AFF1D00454A19 /* helper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,11 +397,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					vert_conv.cpp,
-					hor_conv.cpp,
-					1a.cpp,
-				);
+				EXCLUDED_SOURCE_FILE_NAMES = 1a.cpp;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = NO;
@@ -455,11 +463,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					vert_conv.cpp,
-					hor_conv.cpp,
-					1a.cpp,
-				);
+				EXCLUDED_SOURCE_FILE_NAMES = 1a.cpp;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

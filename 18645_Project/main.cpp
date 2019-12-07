@@ -3,16 +3,17 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
-#include "1a.cpp"
+#include "GaussianBlur_modified.hpp"
+#include "substraction_kernel.hpp"
+#include "helper.hpp"
 using namespace cv;
 using namespace std;
 
 #include "precomp.hpp"
 #include <stdarg.h>
 #include <opencv2/core/hal/hal.hpp>
-// #include "helper.hpp"
 
-
+// define global variables
 int timer_helper_subpixel = 10;
 uint64_t cycles_subpixel = 0;
 int timer_helper_harris = 10;
@@ -26,6 +27,7 @@ uint64_t buildGaussianPyramidCycles = 0;
 uint64_t buildDoGCycles = 0;
 
 
+// source code of SIFT from opencv
 namespace cv
 {
     namespace xfeatures2d
@@ -185,16 +187,8 @@ namespace cv
                 double sig_total = sig_prev*k;
                 sig[i] = std::sqrt(sig_total*sig_total - sig_prev*sig_prev);
                 
-//                const Mat& src = pyr[1];
-//                int type = src.type();
-//                int depth = CV_MAT_DEPTH(type);
-//                int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-//                int height = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-//                printf("sigma[%i] = %f, width: %i, height: %i \n", i, sig[i], width, height);
             }
             
-            printf("o in nOctaves %i \n", nOctaves);
-            printf("i in nOctaveLayers + 3 %i \n", nOctaveLayers+3);
             for( int o = 0; o < nOctaves; o++ )
             {
                 for( int i = 0; i < nOctaveLayers + 3; i++ )
@@ -202,7 +196,6 @@ namespace cv
                     Mat& dst = pyr[o*(nOctaveLayers + 3) + i];
                     if( o == 0  &&  i == 0 ) {
                         dst = base;
-                        printf("In %i-th Octaves, Size of image is %i by %i \n",o,dst.cols,dst.rows);
                     }
                     // base of new octave is halved image from end of previous octave
                     else if( i == 0 )
@@ -210,23 +203,12 @@ namespace cv
                         const Mat& src = pyr[(o-1)*(nOctaveLayers + 3) + nOctaveLayers];
                         resize(src, dst, Size(src.cols/2, src.rows/2),
                                0, 0, INTER_NEAREST); // resize image when changing to another octave
-                        printf("In %i-th Octaves, Size of image is %i by %i \n",o,dst.cols,dst.rows);
                     }
                     else
                     {
                         const Mat& src = pyr[o*(nOctaveLayers + 3) + i-1];
 //                        GaussianBlur(src, dst, Size(), sig[i], sig[i]);
-                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i], cycles_conv, cycles_mem);
-//
-                        int type = src.type();
-                        int depth = CV_MAT_DEPTH(type);
-                        int width = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-                        int height = cvRound(sig[i]*(depth == CV_8U ? 3 : 4)*2 + 1)|1;
-                        printf("o = %i, sigma[%i] = %f, k_width: %i, k_height: %i, src_width: %i, src_height: %i\n", o, i, sig[i], width, height, src.size().width, src.size().height);
-                        
-//                        printf("Size:::: %i, %i",Size().height, Size().width);
-//                        printf("size type: %i", src.type());
-                        // TODO: why src and dst are adjacent?
+                        GaussianBlur_modified(src, dst, Size(), sig[i], sig[i]);
                     }
                 }
             }
@@ -257,7 +239,8 @@ namespace cv
                     const Mat& src1 = gpyr[o*(nOctaveLayers + 3) + i];
                     const Mat& src2 = gpyr[o*(nOctaveLayers + 3) + i + 1];
                     Mat& dst = dogpyr[o*(nOctaveLayers + 2) + i];
-                    subtract(src2, src1, dst, noArray(), DataType<sift_wt>::type);
+//                    subtract(src2, src1, dst, noArray(), DataType<sift_wt>::type);
+                    substraction_kernel(src1, src2, dst);
                 }
             }
             
@@ -270,7 +253,6 @@ namespace cv
         void SIFT_Impl::buildDoGPyramid( const std::vector<Mat>& gpyr, std::vector<Mat>& dogpyr ) const
         {
             int nOctaves = (int)gpyr.size()/(nOctaveLayers + 3);
-            printf("nOctaves in buildDoGPyramid: %i \n",nOctaves);
             dogpyr.resize( nOctaves*(nOctaveLayers + 2) );
             
             parallel_for_(Range(0, nOctaves * (nOctaveLayers + 2)), buildDoGPyramidComputer(nOctaveLayers, gpyr, dogpyr));
@@ -468,7 +450,6 @@ namespace cv
                 if (timer_helper_subpixel-- > 0) {
                     cycles_subpixel += (end-start);
                     if(timer_helper_subpixel == 0){
-                        printf("adjust keypoints location to subpixel accuracy cycles: %lld \n", cycles_subpixel/10);
                     }
                 }
                 
@@ -522,7 +503,6 @@ namespace cv
                 if (timer_helper_harris-- > 0) {
                     cycles_harris += (end-start);
                     if(timer_helper_harris == 0){
-                        printf("harris cycles: %lld \n", cycles_harris/10);
                     }
                 }
                 if( det <= 0 || tr*tr*edgeThreshold >= (edgeThreshold + 1)*(edgeThreshold + 1)*det )
@@ -670,9 +650,7 @@ namespace cv
                                               std::vector<KeyPoint>& keypoints ) const
         {
             const int nOctaves = (int)gauss_pyr.size()/(nOctaveLayers + 3);
-            printf("nOctaves in findScaleSpaceExtrema: %i \n", nOctaves);
             const int threshold = cvFloor(0.5 * contrastThreshold / nOctaveLayers * 255 * SIFT_FIXPT_SCALE);
-            printf("threshold in findScaleSpaceExtrema: %i \n", threshold);
             
             keypoints.clear(); // empty keypoints
             TLSData<std::vector<KeyPoint> > tls_kpts_struct; // multi-threads
@@ -1112,56 +1090,29 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
             }
             
             Mat base = createInitialImage(image, firstOctave < 0, (float)sigma); //will double
-            printf("base size: %i, %i \n", base.rows, base.cols);
             std::vector<Mat> gpyr, dogpyr;
             int nOctaves = actualNOctaves > 0 ? actualNOctaves : cvRound(std::log( (double)std::min( base.cols, base.rows ) ) / std::log(2.) - 2) - firstOctave -2; //nOctaves
-            printf("nOctaves: %i \n", nOctaves);
             
-            double t, tf = getTickFrequency();
-            //            t = (double)getTickCount();
             start = rdtsc();
             buildGaussianPyramid(base, gpyr, nOctaves); // gaussian blur
             end = rdtsc();
             tt = end - start;
             buildGaussianPyramidCycles += tt;
-            printf("buildGaussianPyramid cycles: %lld\n", tt);
-            printf("buildGaussianPyramid cycles used in mem: %lld\n", cycles_mem);
-            printf("buildGaussianPyramid cycles used in conv: %lld\n", cycles_conv);
-            
             
             start = rdtsc();
             buildDoGPyramid(gpyr, dogpyr); //substract
             end = rdtsc();
             tt = end - start;
-            printf("buildDoGPyramid cycles: %lld\n", tt);
             buildDoGCycles += tt;
-            //
-            //            t = (double)getTickCount() - t;
-            //            printf("pyramid construction time: %g\n", t*1000./tf);
             
             if( !useProvidedKeypoints )
             {
-                //                t = (double)getTickCount();
-                start = rdtsc();
                 findScaleSpaceExtrema(gpyr, dogpyr, keypoints); //find local extrema
-                end = rdtsc();
-                tt = end - start;
-                printf("findScaleSpaceExtrema cycles: %lld\n", tt);
                 
-                start = rdtsc();
                 KeyPointsFilter::removeDuplicatedSorted( keypoints ); //remove duplicated
-                end = rdtsc();
-                tt = end - start;
-                printf("removeDuplicatedSorted cycles: %lld\n", tt);
-                
-                printf("Extrema_Localization_count: %lld\n", Extrema_Localization_count);
-                printf("Adjusting_keypoint_locations_count: %lld\n", Adjusting_keypoint_locations_count);
-                printf("Eliminating_Edge_Responses_count: %lld\n", Eliminating_Edge_Responses_count);
 
                 if( nfeatures > 0 )
                     KeyPointsFilter::retainBest(keypoints, nfeatures);
-                //                t = (double)getTickCount() - t;
-                //                printf("keypoint detection time: %g\n", t*1000./tf);
                 
                 if( firstOctave < 0 )
                     for( size_t i = 0; i < keypoints.size(); i++ )
@@ -1176,23 +1127,6 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
                 if( !mask.empty() )
                     KeyPointsFilter::runByPixelsMask( keypoints, mask );
             }
-            else
-            {
-                // filter keypoints by mask
-                //KeyPointsFilter::runByPixelsMask( keypoints, mask );
-            }
-            
-            //            if( _descriptors.needed() )
-            //            {
-            //                //t = (double)getTickCount();
-            //                int dsize = descriptorSize();
-            //                _descriptors.create((int)keypoints.size(), dsize, CV_32F);
-            //                Mat descriptors = _descriptors.getMat();
-            //
-            //                calcDescriptors(gpyr, keypoints, descriptors, nOctaveLayers, firstOctave);
-            //                //t = (double)getTickCount() - t;
-            //                //printf("descriptor extraction time: %g\n", t*1000./tf);
-            //            }
         }
         
         
@@ -1209,19 +1143,10 @@ hist[idx_buf[(id)]+(d+3)*(n+2)+1] += rco_buf[56 + (id)];
 
 int main( int argc, char** argv )
 {
-                    
+    printf("Start Running!\n");
     for (int iters = 0; iters < 128; iters++) {
        cv::Mat input = cv::imread("/Users/stevenliu/Downloads/demo1024.JPG", 0); //Load as grayscale
        resize(input, input, Size(1024, 1024));
-
-
-       printf("Arguments: \n");
-       printf("nfeatures: %i \n", 0);
-       printf("nOctaveLayers: %i \n", 3);
-       printf("contrastThreshold: %f \n", 0.04);
-       printf("edgeThreshold: %i \n", 10);
-       printf("sigma: %f \n", 1.6);
-       printf("\n");
 
        Mat output;
        Mat mask = Mat();
@@ -1233,19 +1158,10 @@ int main( int argc, char** argv )
        std::vector<KeyPoint> keypoints_1;
        std::vector<KeyPoint> keypoints_2;
 
-       printf("Input Size is %i, %i \n",input.rows,input.cols);
        sift_instance.detectAndCompute(input, mask, keypoints_2, output);
     }
     
-    printf("\n\n\nn\n\n\n %lld, %lld", buildGaussianPyramidCycles >> 7, buildDoGCycles >> 7);
-    //    f2d->detect( input, keypoints_1 );
-
-//    cv::drawKeypoints(input, keypoints_2, input);
-//    namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
-//    imshow( "Display window", input );                // Show our image inside it.
-
-//    delete(your_matrix);
-    waitKey(0);
+    printf("Cycles spent on buildGaussianPyramid: %lld\nCycles spent on buildDoGPyramid: %lld\n", buildGaussianPyramidCycles >> 7, buildDoGCycles >> 7);
     
     return 0;
 }
